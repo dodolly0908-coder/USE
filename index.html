@@ -193,6 +193,9 @@
     <button onClick="{{ selectPageClean }}" style="height:36px;border:1.5px solid {{ pageCleanBorder }};background:{{ pageCleanBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageCleanColor }};cursor:pointer;">🧹 每週清潔值日</button>
     <button onClick="{{ selectPageWork }}" style="height:36px;border:1.5px solid {{ pageWorkBorder }};background:{{ pageWorkBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageWorkColor }};cursor:pointer;">🧾 每日工作表</button>
     <button onClick="{{ selectPageWork2 }}" style="height:36px;border:1.5px solid {{ pageWork2Border }};background:{{ pageWork2Bg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageWork2Color }};cursor:pointer;">🧾 每日工作表</button>
+    <sc-if value="{{ canSeeCount }}" hint-placeholder-val="{{ false }}">
+      <button onClick="{{ selectPageCount }}" style="height:36px;border:1.5px solid {{ pageCountBorder }};background:{{ pageCountBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageCountColor }};cursor:pointer;">📊 筆數</button>
+    </sc-if>
   </div>
 
   <sc-if value="{{ monthLocked }}" hint-placeholder-val="{{ false }}">
@@ -1159,6 +1162,92 @@
     </div>
   </sc-if>
 
+  <sc-if value="{{ showCount }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1480px;background:var(--card);border:1px solid var(--line2);border-radius:14px;box-shadow:0 2px 12px rgba(20,30,50,.06);padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:900;color:var(--ink);margin-bottom:12px;">全商戶筆數統計 <span style="font-size:11px;font-weight:700;color:var(--muted);">受理的提款單筆數；只保留最近 3 個月；時間為北京時間實際鐘點</span></div>
+
+      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;background:var(--surf1);border:1px solid var(--line2);border-radius:10px;padding:11px 12px;margin-bottom:12px;">
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">月份</span>
+          <select value="{{ cntMonth }}" onChange="{{ onCntMonth }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);">
+            <sc-for list="{{ cntMonthOptions }}" as="mo" hint-placeholder-count="3"><option value="{{ mo.value }}">{{ mo.label }}</option></sc-for>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">起始日</span>
+          <input type="date" value="{{ cntFrom }}" onChange="{{ onCntFrom }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">結束日</span>
+          <input type="date" value="{{ cntTo }}" onChange="{{ onCntTo }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">班別</span>
+          <select value="{{ cntShift }}" onChange="{{ onCntShift }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);">
+            <option value="all">全天</option>
+            <option value="early">早班 08–16</option>
+            <option value="mid">中班 16–24</option>
+            <option value="night">晚班 00–08</option>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">金額檔</span>
+          <select value="{{ cntBucket }}" onChange="{{ onCntBucket }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);">
+            <option value="all">全部金額</option>
+            <sc-for list="{{ cntBucketOptions }}" as="bo" hint-placeholder-count="6"><option value="{{ bo.value }}">{{ bo.label }}</option></sc-for>
+          </select>
+        </label>
+        <button onClick="{{ fetchCount }}" style="height:34px;border:none;background:var(--accent);color:#fff;border-radius:8px;padding:0 18px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;">{{ cntFetchLabel }}</button>
+        <span style="font-size:11.5px;font-weight:700;color:var(--muted);">{{ cntUpdatedText }}</span>
+      </div>
+
+      <sc-if value="{{ cntHasPlatforms }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-bottom:12px;">
+          <div style="font-size:11px;font-weight:800;color:var(--muted);margin-bottom:7px;">商戶／平台（不選＝全部）</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            <sc-for list="{{ cntPlatformChips }}" as="pc" hint-placeholder-count="6">
+              <button onClick="{{ pc.onToggle }}" style="height:28px;border:1.5px solid {{ pc.border }};background:{{ pc.bg }};color:{{ pc.color }};border-radius:999px;padding:0 12px;font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;">{{ pc.code }}</button>
+            </sc-for>
+            <sc-if value="{{ cntHasSelected }}" hint-placeholder-val="{{ false }}">
+              <button onClick="{{ clearCntPlatforms }}" style="height:28px;border:none;background:transparent;color:var(--muted);font-family:inherit;font-size:12px;font-weight:800;cursor:pointer;">清除</button>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cntHasError }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--rest-head);border:1px solid var(--rest);border-radius:10px;padding:10px 13px;font-size:12.5px;font-weight:800;color:var(--rest);margin-bottom:12px;white-space:pre-line;">{{ cntError }}</div>
+      </sc-if>
+
+      <sc-if value="{{ cntHasRows }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:800;color:var(--muted);">合計</span>
+          <span style="font-size:22px;font-weight:900;color:var(--accent-deep);font-variant-numeric:tabular-nums;">{{ cntTotal }}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--muted);">筆　·　{{ cntRowCount }} 列</span>
+        </div>
+        <div style="overflow:auto;max-height:620px;border:1px solid var(--line2);border-radius:10px;">
+          <table style="border-collapse:separate;border-spacing:0;font-size:13px;width:100%;min-width:420px;">
+            <thead>
+              <tr>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:left;width:140px;">日期</th>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:left;">項目（商戶）</th>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:120px;">筆數</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ cntRows }}" as="cr" hint-placeholder-count="8">
+                <tr>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);color:var(--ink2);">{{ cr.date }}</td>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ cr.code }}</td>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;color:var(--accent-deep);">{{ cr.count }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ cntShowEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:34px 0;text-align:center;font-size:13px;font-weight:700;color:var(--muted);">{{ cntEmptyText }}</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ reasonEditOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeReason }}" style="position:fixed;inset:0;z-index:49;background:transparent;"></div>
     <div style="{{ reasonEditStyle }}">
@@ -1330,6 +1419,7 @@ class Component extends DCLogic {
     const _roster = this.initRoster(_accounts);
     this.state = {
       year:(new Date()).getFullYear(), month:(new Date()).getMonth()+1, current:'a',
+      cntMonth: (()=>{ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); })(), cntFrom:'', cntTo:'', cntShift:'all', cntBucket:'all', cntPlatforms:[], cntData:null, cntLoading:false, cntError:'', cntUpdated:null,
       role:'admin', boundGroup:'a', boundMember:'',
       showAdmin:false, newMemberName:'',
       groupOrder: _roster.groupOrder,
@@ -2388,6 +2478,88 @@ class Component extends DCLogic {
 
   canEditLimit(){ const s=this.state; return s.role==='admin' || s.role==='lead'; }
   canManageRow(a){ const s=this.state; return s.role==='admin' || s.role==='lead'; }
+  cntMonthKey(y, m){ return y+'-'+String(m).padStart(2,'0'); }
+  cntDefaultRange(mk){
+    const [y, m] = mk.split('-').map(Number);
+    const dim = new Date(y, m, 0).getDate();
+    const now = new Date();
+    const isCur = (now.getFullYear()===y && now.getMonth()+1===m);
+    const end = isCur ? now.getDate() : dim;
+    return { from: mk+'-01', to: mk+'-'+String(end).padStart(2,'0') };
+  }
+  fetchCount = async () => {
+    if(this.state.cntLoading) return;
+    const mk = this.state.cntMonth;
+    this.setState({ cntLoading: true, cntError: '' });
+    try {
+      const res = await fetch('/api/count?month=' + encodeURIComponent(mk), { method: 'GET', cache: 'no-store' });
+      if(res.type === 'opaqueredirect' || res.status === 302 || res.status === 403){
+        throw new Error('777444 拒絕連線（IP 不在白名單）。\n需請 777444 工程師讓此 API 憑金鑰放行，或把 Vercel 固定 IP 加入白名單。');
+      }
+      if(res.status === 401) throw new Error('金鑰錯誤（401）：請檢查 Vercel 環境變數 DETECT_API_KEY。');
+      if(!res.ok){ let t=''; try{ const j=await res.json(); t=j.error||''; }catch(e){} throw new Error('伺服器錯誤（'+res.status+'）'+(t?'：'+t:'')); }
+      const data = await res.json();
+      if(!data || data.ok===false) throw new Error('回傳 ok=false'+(data&&data.error?'：'+data.error:''));
+      this.setState({ cntData: data, cntLoading: false, cntUpdated: new Date(), cntError: '' });
+    } catch(e){
+      const msg = (e && e.message) || String(e);
+      const net = /Failed to fetch|NetworkError|Load failed/i.test(msg);
+      this.setState({ cntLoading: false, cntError: net
+        ? '無法連線到中轉站 /api/count。\n請確認 GitHub 的 api/count.js 已上傳，且網頁是從 Vercel 網址開啟（不是直接開本機檔案）。'
+        : msg });
+    }
+  };
+  buildCountVM(){
+    const st = this.state;
+    const now = new Date();
+    const months = [0,1,2].map(i => { const d = new Date(now.getFullYear(), now.getMonth()-i, 1); const mk = this.cntMonthKey(d.getFullYear(), d.getMonth()+1); return { value: mk, label: d.getFullYear()+' 年 '+(d.getMonth()+1)+' 月' }; });
+    const data = st.cntData;
+    const buckets = (data && data.buckets) || ['500以下','501-1000','1001-3000','3001-5000','5001-10000','10001以上'];
+    const hours = (data && data.hours) || {};
+    const codes = []; Object.values(hours).forEach(h => Object.keys(h||{}).forEach(c => { if(codes.indexOf(c)<0) codes.push(c); }));
+    codes.sort();
+    const sel = st.cntPlatforms || [];
+    const shiftOk = (hh) => st.cntShift==='early' ? (hh>=8&&hh<16) : st.cntShift==='mid' ? (hh>=16) : st.cntShift==='night' ? (hh<8) : true;
+    const bi = st.cntBucket==='all' ? -1 : Number(st.cntBucket);
+    const agg = {};
+    Object.keys(hours).forEach(key => {
+      const date = key.slice(0,10); const hh = Number(key.slice(11,13));
+      if(st.cntFrom && date < st.cntFrom) return;
+      if(st.cntTo && date > st.cntTo) return;
+      if(!shiftOk(hh)) return;
+      Object.entries(hours[key]||{}).forEach(([code, arr]) => {
+        if(sel.length && sel.indexOf(code)<0) return;
+        const n = bi<0 ? (arr||[]).reduce((a,b)=>a+(Number(b)||0),0) : (Number((arr||[])[bi])||0);
+        const k = date+'|'+code; agg[k] = (agg[k]||0) + n;
+      });
+    });
+    const rows = Object.keys(agg).filter(k => agg[k]>0).sort().map(k => { const [date, code] = k.split('|'); return { date, code, count: agg[k].toLocaleString() }; });
+    const total = Object.values(agg).reduce((a,b)=>a+b,0);
+    const chips = codes.map(code => { const on = sel.indexOf(code)>=0; return {
+      code, bg: on?'var(--accent-soft)':'var(--card)', border: on?'var(--accent)':'var(--line2)', color: on?'var(--accent-deep)':'var(--ink2)',
+      onToggle: () => this.setState(s => { const cur = s.cntPlatforms||[]; return { cntPlatforms: cur.indexOf(code)>=0 ? cur.filter(x=>x!==code) : [...cur, code] }; })
+    }; });
+    const pad = (n) => String(n).padStart(2,'0');
+    const u = st.cntUpdated;
+    return {
+      cntMonth: st.cntMonth, cntMonthOptions: months, cntFrom: st.cntFrom, cntTo: st.cntTo, cntShift: st.cntShift, cntBucket: st.cntBucket,
+      cntBucketOptions: buckets.map((b,i) => ({ value: String(i), label: b })),
+      cntFetchLabel: st.cntLoading ? '讀取中…' : (data ? '重新整理' : '取得資料'),
+      cntUpdatedText: u ? ('更新於 '+pad(u.getHours())+':'+pad(u.getMinutes())+':'+pad(u.getSeconds())) : '',
+      cntHasPlatforms: codes.length>0, cntPlatformChips: chips, cntHasSelected: sel.length>0,
+      cntHasError: !!st.cntError, cntError: st.cntError,
+      cntHasRows: rows.length>0, cntRows: rows, cntTotal: total.toLocaleString(), cntRowCount: rows.length,
+      cntShowEmpty: !st.cntError && rows.length===0,
+      cntEmptyText: st.cntLoading ? '讀取中…' : (data ? '此條件下沒有筆數資料' : '按「取得資料」讀取本月筆數'),
+      onCntMonth: (e) => { const mk = e.target.value; const r = this.cntDefaultRange(mk); this.setState({ cntMonth: mk, cntFrom: r.from, cntTo: r.to, cntData: null, cntPlatforms: [], cntError: '' }, () => this.fetchCount()); },
+      onCntFrom: (e) => this.setState({ cntFrom: e.target.value }),
+      onCntTo: (e) => this.setState({ cntTo: e.target.value }),
+      onCntShift: (e) => this.setState({ cntShift: e.target.value }),
+      onCntBucket: (e) => this.setState({ cntBucket: e.target.value }),
+      clearCntPlatforms: () => this.setState({ cntPlatforms: [] }),
+      fetchCount: this.fetchCount,
+    };
+  }
   isPastMonth(){ const n=new Date(); const s=this.state; return (s.year*12+s.month) < (n.getFullYear()*12 + n.getMonth()+1); }
   monthLocked(){ return this.isPastMonth() && !(this.state.role==='admin' || this.state.role==='lead'); }
   rowEditable(memberId){
@@ -2579,7 +2751,12 @@ class Component extends DCLogic {
       onDelete: () => this.confirmAct('確定要刪除這筆交接紀錄嗎？', () => this.deleteHandover(h.id)),
     }));
     const hoEmpty = hoRows.length===0;
-    const showRoster = page!=='handover' && page!=='duty' && page!=='clean' && page!=='work' && page!=='work2';
+    const canSeeCount = role==='admin' || role==='lead';
+    const showCount = page==='count' && canSeeCount;
+    const showRoster = page!=='handover' && page!=='duty' && page!=='clean' && page!=='work' && page!=='work2' && !showCount;
+    const pageCountBg = showCount ? 'var(--accent-soft)' : 'var(--card)';
+    const pageCountBorder = showCount ? 'var(--accent)' : 'var(--line2)';
+    const pageCountColor = showCount ? 'var(--accent-deep)' : 'var(--ink2)';
     const showHandover = page==='handover';
     const showDuty = page==='duty';
     const showClean = page==='clean';
@@ -2979,6 +3156,9 @@ class Component extends DCLogic {
       pageRosterBg, pageRosterBorder, pageRosterColor, pageHandoverBg, pageHandoverBorder, pageHandoverColor,
       pageDutyBg, pageDutyBorder, pageDutyColor, pageCleanBg, pageCleanBorder, pageCleanColor, pageWorkBg, pageWorkBorder, pageWorkColor,
       pageWork2Bg, pageWork2Border, pageWork2Color,
+      canSeeCount, showCount, pageCountBg, pageCountBorder, pageCountColor,
+      selectPageCount: () => { const first = !this.state.cntData; const r = this.cntDefaultRange(this.state.cntMonth); this.setState(s => ({ page:'count', cntFrom: s.cntFrom || r.from, cntTo: s.cntTo || r.to }), () => { if(first) this.fetchCount(); }); },
+      ...this.buildCountVM(),
       hoForm, hoRows, hoEmpty,
       onHoDate:this.onHoDate, onHoContent:this.onHoContent, onHoSource:this.onHoSource, onHoProgress:this.onHoProgress, onHoHandler:this.onHoHandler,
       addHandover:this.addHandover,
