@@ -1321,15 +1321,26 @@
         <div style="margin-top:18px;">
           <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
             <span style="font-size:14px;font-weight:900;color:var(--ink);">崗位分配</span>
-            <span style="font-size:11.5px;font-weight:700;color:var(--muted);">日均 ≥ 200 為大平台並拆分（200→2、300→3）；每崗位最多 4 個平台；IP 不重複，拿到大平台 IP 的崗位不再拿其他 IP</span>
+            <span style="font-size:11.5px;font-weight:700;color:var(--muted);">日均 ≥ 200 為大平台並拆分（200→2、300→3）；每崗位最多 4 個平台；IP 不重複、每崗位最多 2 個，拿到大平台 IP 的崗位不再拿其他 IP</span>
           </div>
           <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;font-weight:800;color:var(--muted);">
             <span>每崗位目標 <span style="font-size:16px;font-weight:900;color:var(--accent-deep);font-variant-numeric:tabular-nums;">{{ posTarget }}</span> 筆</span>
             <span>最高與最低差 <span style="font-size:16px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;">{{ posSpread }}</span> 筆</span>
             <span>平台份數 <span style="font-size:16px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;">{{ posPieceCount }}</span></span>
+            <sc-if value="{{ posCanEdit }}" hint-placeholder-val="{{ false }}">
+              <span style="display:flex;gap:8px;margin-left:auto;">
+                <button onClick="{{ togglePosEdit }}" style="height:30px;border:1.5px solid var(--accent);background:var(--card);color:var(--accent-deep);border-radius:8px;padding:0 14px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;">{{ posEditLabel }}</button>
+                <sc-if value="{{ posEditMode }}" hint-placeholder-val="{{ false }}">
+                  <button onClick="{{ clearPosManual }}" style="height:30px;border:1px solid var(--line2);background:var(--surf2);color:var(--over-ink);border-radius:8px;padding:0 12px;font-family:inherit;font-size:12.5px;font-weight:800;cursor:pointer;">清除手動</button>
+                </sc-if>
+              </span>
+            </sc-if>
           </div>
           <sc-if value="{{ posHasWarn }}" hint-placeholder-val="{{ false }}">
             <div style="background:var(--rest-head);border:1px solid var(--rest);border-radius:10px;padding:9px 13px;font-size:12px;font-weight:800;color:var(--rest);margin-bottom:8px;white-space:pre-line;">{{ posWarn }}</div>
+          </sc-if>
+          <sc-if value="{{ posEditMode }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--surf1);border:1px solid var(--line2);border-radius:10px;padding:9px 13px;font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px;">在崗位填入「手動平台」後，該崗位不再自動分配平台，其餘平台平均分給其他崗位；「手動 IP」會取代該崗位的自動 IP。多個以「、」或逗號分隔。</div>
           </sc-if>
           <div style="overflow:auto;border:1px solid var(--line2);border-radius:10px;">
             <table style="border-collapse:separate;border-spacing:0;font-size:13px;width:100%;min-width:620px;">
@@ -1344,12 +1355,20 @@
               </thead>
               <tbody>
                 <sc-for list="{{ posSlots }}" as="ps" hint-placeholder-count="13">
-                  <tr>
-                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ ps.no }}</td>
-                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ ps.plats }}</td>
+                  <tr style="background:{{ ps.rowBg }};">
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ ps.no }} <span style="font-size:10.5px;font-weight:800;color:var(--accent-deep);">{{ ps.tag }}</span></td>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ ps.plats }}
+                      <sc-if value="{{ posEditMode }}" hint-placeholder-val="{{ false }}">
+                        <input value="{{ ps.platsText }}" onChange="{{ ps.onPlats }}" placeholder="手動平台（如新開平台）" style="width:100%;box-sizing:border-box;height:28px;border:1px solid var(--rule);border-radius:7px;padding:0 8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--ink);background:var(--card);margin-top:5px;" />
+                      </sc-if>
+                    </td>
                     <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;color:var(--ink2);">{{ ps.platCount }}</td>
                     <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;color:{{ ps.loadColor }};">{{ ps.load }}</td>
-                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);color:var(--accent-deep);">{{ ps.ip }}</td>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);color:var(--accent-deep);">{{ ps.ip }}
+                      <sc-if value="{{ posEditMode }}" hint-placeholder-val="{{ false }}">
+                        <input value="{{ ps.ipText }}" onChange="{{ ps.onIps }}" placeholder="手動 IP" style="width:100%;box-sizing:border-box;height:28px;border:1px solid var(--rule);border-radius:7px;padding:0 8px;font-family:inherit;font-size:12px;font-weight:700;color:var(--ink);background:var(--card);margin-top:5px;" />
+                      </sc-if>
+                    </td>
                   </tr>
                 </sc-for>
               </tbody>
@@ -1536,7 +1555,7 @@ class Component extends DCLogic {
     this.state = {
       year:(new Date()).getFullYear(), month:(new Date()).getMonth()+1, current:'a',
       cntMonth: (()=>{ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); })(), cntFrom:'', cntTo:'', cntShift:'all', cntBucket:'all', cntPlatforms:[], cntData:null, cntLoading:false, cntError:'', cntUpdated:null,
-      posMonth: (()=>{ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); })(), posFrom:'', posTo:'', posData:null, posLoading:false, posError:'', posUpdated:null, posHeadcount: (()=>{ try{ const v=Number(localStorage.getItem('pos.headcount')); return v>0?v:13; }catch(e){ return 13; } })(),
+      posMonth: (()=>{ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); })(), posFrom:'', posTo:'', posData:null, posLoading:false, posError:'', posUpdated:null, posHeadcount: (()=>{ try{ const v=Number(localStorage.getItem('pos.headcount')); return v>0?v:13; }catch(e){ return 13; } })(), posManual: (()=>{ try{ return JSON.parse(localStorage.getItem('pos.manual.v1')||'{}')||{}; }catch(e){ return {}; } })(), posEditMode:false,
       role:'admin', boundGroup:'a', boundMember:'',
       showAdmin:false, newMemberName:'',
       groupOrder: _roster.groupOrder,
@@ -2239,7 +2258,8 @@ class Component extends DCLogic {
     dutyGroups: this.state.dutyGroups, dutyOrder: this.state.dutyOrder, dutyCurrent: this.state.dutyCurrent, dutyAssign: this.state.dutyAssign,
     cleanGroups: this.state.cleanGroups, cleanOrder: this.state.cleanOrder, cleanCurrent: this.state.cleanCurrent, cleanAssign: this.state.cleanAssign,
     workGroups: this.state.workGroups, workOrder: this.state.workOrder, workCurrent: this.state.workCurrent, workAssign: this.state.workAssign,
-    work2Groups: this.state.work2Groups, work2Order: this.state.work2Order, work2Current: this.state.work2Current, work2Assign: this.state.work2Assign }; }
+    work2Groups: this.state.work2Groups, work2Order: this.state.work2Order, work2Current: this.state.work2Current, work2Assign: this.state.work2Assign,
+    posManual: this.state.posManual || {}, posHeadcount: this.state.posHeadcount || 13 }; }
   pushCloud(){
     if(!this._db) return;
     clearTimeout(this._pushT);
@@ -2306,6 +2326,8 @@ class Component extends DCLogic {
       patch.work2Groups = doc.work2Groups; patch.work2Order = doc.work2Order||[]; patch.work2Current = doc.work2Current||''; patch.work2Assign = doc.work2Assign||{};
       try{ localStorage.setItem('duty.work2.v1', JSON.stringify({groups:doc.work2Groups, order:doc.work2Order||[], current:doc.work2Current||'', assign:doc.work2Assign||{}})); }catch(e){}
     }
+    if(doc.posManual && typeof doc.posManual==='object'){ patch.posManual = doc.posManual; try{ localStorage.setItem('pos.manual.v1', JSON.stringify(doc.posManual)); }catch(e){} }
+    if(Number(doc.posHeadcount)>0){ patch.posHeadcount = Number(doc.posHeadcount); try{ localStorage.setItem('pos.headcount', String(doc.posHeadcount)); }catch(e){} }
     if(!groupOrder.includes(this.state.current)) patch.current = groupOrder.find(k=>k!=='admin') || groupOrder[0];
     const sess = this.state.session;
     if(sess){ const acct=accounts.find(a=>a.username===sess); if(acct && !acct.disabled) Object.assign(patch, this.applyAccount(acct)); }
@@ -2671,64 +2693,92 @@ class Component extends DCLogic {
     }));
     // ===== 崗位分配 =====
     const N = Math.max(1, Number(st.posHeadcount)||13);
+    const manual = st.posManual || {};
+    const splitList = (t) => (t||'').split(/[、,，;；\s]+/).map(x => x.trim()).filter(Boolean);
+    const mInfo = Array.from({length:N}, (_,i) => { const m = manual[i]||{}; return { platsText: m.plats||'', ipText: m.ips||'', plats: splitList(m.plats), ips: splitList(m.ips) }; });
     const avgOf = {}; Object.keys(sum).forEach(c => { avgOf[c] = days ? sum[c]/days : 0; });
+    const manualPlatSet = new Set(); mInfo.forEach(m => m.plats.forEach(p => manualPlatSet.add(p)));
+    const manualIpSet = new Set(); mInfo.forEach(m => m.ips.forEach(p => manualIpSet.add(p)));
     const splitN = (a) => a>=200 ? Math.max(2, Math.floor(a/100)) : 1;
     const suffix = (k, i) => k===2 ? ['小','大'][i] : k===3 ? ['小','中','大'][i] : String(i+1);
+    const slots = mInfo.map(m => ({ items:[], load:0, plats:new Set(), ips:[], bigIp:false, reserved: m.plats.length>0, manualIp: m.ips.length>0 }));
+    mInfo.forEach((m, i) => m.plats.forEach(p => { const ld = avgOf[p]||0; slots[i].items.push({ plat:p, name:p, load:ld, big:false, manual:true }); slots[i].load += ld; slots[i].plats.add(p); }));
     const pieces = [];
-    Object.keys(avgOf).filter(c => avgOf[c]>0).forEach(c => {
+    Object.keys(avgOf).filter(c => avgOf[c]>0 && !manualPlatSet.has(c)).forEach(c => {
       const k = splitN(avgOf[c]);
       if(k===1) pieces.push({ plat:c, name:c, load:avgOf[c], big:false });
       else for(let i=0;i<k;i++) pieces.push({ plat:c, name:c+suffix(k,i), load:avgOf[c]/k, big:true });
     });
     pieces.sort((a,b) => b.load-a.load);
-    const slots = Array.from({length:N}, () => ({ items:[], load:0, plats:new Set(), ips:[], bigIp:false }));
+    const autoSlots = slots.filter(x => !x.reserved);
     let overflow = false;
-    pieces.forEach(p => {
-      let cand = slots.filter(x => x.items.length<4 && !x.plats.has(p.plat));
-      if(!cand.length){ overflow = true; cand = slots.filter(x => !x.plats.has(p.plat)); }
-      if(!cand.length) cand = slots;
+    if(autoSlots.length) pieces.forEach(p => {
+      let cand = autoSlots.filter(x => x.items.length<4 && !x.plats.has(p.plat));
+      if(!cand.length){ overflow = true; cand = autoSlots.filter(x => !x.plats.has(p.plat)); }
+      if(!cand.length) cand = autoSlots;
       const t = cand.reduce((b,x) => (x.load<b.load || (x.load===b.load && x.items.length<b.items.length)) ? x : b, cand[0]);
       t.items.push(p); t.load += p.load; t.plats.add(p.plat);
     });
-    // IP：每個平台一個 IP，不重複；拿到大平台 IP 的崗位不再拿其他 IP
-    const bigPlats = Object.keys(avgOf).filter(c => splitN(avgOf[c])>1).sort((a,b) => avgOf[b]-avgOf[a]);
-    const smallPlats = Object.keys(avgOf).filter(c => avgOf[c]>0 && splitN(avgOf[c])===1).sort((a,b) => avgOf[b]-avgOf[a]);
+    // IP：手動指定優先；其餘每平台一個不重複，每崗位最多 2 個，拿到大平台 IP 的崗位不再拿其他
+    mInfo.forEach((m, i) => { m.ips.forEach(p => slots[i].ips.push({ code:p })); });
+    const ipable = (x) => !x.manualIp && !x.bigIp && x.ips.length<2;
+    const bigPlats = Object.keys(avgOf).filter(c => splitN(avgOf[c])>1 && !manualPlatSet.has(c) && !manualIpSet.has(c)).sort((a,b) => avgOf[b]-avgOf[a]);
+    const smallPlats = Object.keys(avgOf).filter(c => avgOf[c]>0 && (splitN(avgOf[c])===1 || manualPlatSet.has(c)) && !manualIpSet.has(c)).sort((a,b) => avgOf[b]-avgOf[a]);
     const smallCnt = (x) => x.items.filter(i => !i.big).length;
+    const ipUnassigned = [];
     bigPlats.forEach(c => {
-      const hold = slots.filter(x => x.plats.has(c));
+      const hold = slots.filter(x => x.plats.has(c) && !x.manualIp && !x.bigIp);
       const pool = hold.filter(x => !x.ips.length).length ? hold.filter(x => !x.ips.length) : hold;
+      if(!pool.length){ ipUnassigned.push(c); return; }
       const t = pool.reduce((b,x) => (smallCnt(x)<smallCnt(b) || (smallCnt(x)===smallCnt(b) && x.load<b.load)) ? x : b, pool[0]);
-      if(t){ t.ips.push({ code:c, moved:false }); t.bigIp = true; }
+      t.ips.push({ code:c }); t.bigIp = true;
     });
     smallPlats.forEach(c => {
       const own = slots.find(x => x.plats.has(c));
-      if(own && !own.bigIp){ own.ips.push({ code:c, moved:false }); return; }
-      const free = slots.filter(x => !x.bigIp);
-      if(!free.length) return;
+      if(own && ipable(own)){ own.ips.push({ code:c }); return; }
+      const free = slots.filter(ipable);
+      if(!free.length){ ipUnassigned.push(c); return; }
       const t = free.reduce((b,x) => (x.ips.length<b.ips.length || (x.ips.length===b.ips.length && x.load<b.load)) ? x : b, free[0]);
-      t.ips.push({ code:c, moved:true });
+      t.ips.push({ code:c });
     });
     const totalAvg = days ? grand/days : 0;
-    const loads = slots.map(x => x.load);
+    const autoTotal = autoSlots.reduce((a,x)=>a+x.load,0);
+    const loads = autoSlots.map(x => x.load);
     const fmt0 = (n) => Math.round(n).toLocaleString();
+    const targetPer = autoSlots.length ? autoTotal/autoSlots.length : 0;
+    const setManual = (i, field, val) => this.setState(s0 => {
+      const next = { ...(s0.posManual||{}) }; next[i] = { ...(next[i]||{}), [field]: val };
+      if(!next[i].plats && !next[i].ips) delete next[i];
+      try{ localStorage.setItem('pos.manual.v1', JSON.stringify(next)); }catch(e){}
+      return { posManual: next };
+    }, () => this.pushCloud());
     const posSlots = slots.map((x,i) => ({
       no: '崗位 '+(i+1),
       plats: x.items.length ? x.items.map(p => p.name).join('、') : '—',
       platCount: x.items.length+' 個',
       load: fmt0(x.load),
-      ip: x.ips.length ? x.ips.map(p => p.code + (p.moved?'（轉配）':'')).join('、') : '—',
-      loadColor: (totalAvg && Math.abs(x.load - totalAvg/N) > totalAvg/N*0.25) ? 'var(--rest)' : 'var(--accent-deep)',
+      ip: x.ips.length ? x.ips.map(p => p.code).join('、') : '—',
+      tag: (x.reserved || x.manualIp) ? '手動' : '',
+      rowBg: (x.reserved || x.manualIp) ? 'var(--accent-soft)' : 'transparent',
+      loadColor: (!x.reserved && targetPer && Math.abs(x.load - targetPer) > targetPer*0.25) ? 'var(--rest)' : 'var(--accent-deep)',
+      platsText: mInfo[i].platsText, ipText: mInfo[i].ipText,
+      onPlats: (e) => { if(canEdit) setManual(i, 'plats', e.target.value); },
+      onIps: (e) => { if(canEdit) setManual(i, 'ips', e.target.value); },
     }));
     const posWarn = [];
     if(overflow) posWarn.push('平台數量超過「每崗位最多 4 個」的容量（'+pieces.length+' 份 > '+N+'×4），部分崗位超過 4 個平台，建議增加人數。');
+    if(ipUnassigned.length) posWarn.push('崗位 IP 名額已滿（每崗位最多 2 個），以下 IP 未分配：'+ipUnassigned.join('、')+'，建議增加人數。');
     if(pieces.length && pieces.length < N) posWarn.push('平台（含拆分）只有 '+pieces.length+' 份，少於 '+N+' 個崗位，部分崗位為空。');
     const pad = (n) => String(n).padStart(2,'0');
     const u = st.posUpdated;
     const sorted = [...dates].sort();
     return {
       posHeadcount: String(N), posHeadcountOptions: Array.from({length:30}, (_,i) => ({ value:String(i+1), label:(i+1)+' 人' })),
-      onPosHeadcount: (e) => { if(!canEdit) return; const v = Number(e.target.value)||13; try{ localStorage.setItem('pos.headcount', String(v)); }catch(err){} this.setState({ posHeadcount: v }); },
-      posSlots, posTarget: N ? fmt1(totalAvg/N) : '—', posSpread: loads.length ? fmt0(Math.max(...loads)-Math.min(...loads)) : '—',
+      onPosHeadcount: (e) => { if(!canEdit) return; const v = Number(e.target.value)||13; try{ localStorage.setItem('pos.headcount', String(v)); }catch(err){} this.setState({ posHeadcount: v }, () => this.pushCloud()); },
+      posSlots, posTarget: targetPer ? fmt1(targetPer) : '—', posSpread: loads.length ? fmt0(Math.max(...loads)-Math.min(...loads)) : '—',
+      posCanEdit: !!canEdit, posEditMode: !!canEdit && !!st.posEditMode, posEditLabel: st.posEditMode ? '完成編輯' : '✎ 手動調整',
+      togglePosEdit: () => { if(canEdit) this.setState(s0 => ({ posEditMode: !s0.posEditMode })); },
+      clearPosManual: () => { if(canEdit) this.confirmAct('確定清除所有手動調整的平台與 IP 嗎？', () => { try{ localStorage.setItem('pos.manual.v1','{}'); }catch(e){} this.setState({ posManual:{} }, () => this.pushCloud()); }); },
       posHasWarn: posWarn.length>0, posWarn: posWarn.join('\n'), posPieceCount: pieces.length,
       posMonth: st.posMonth, posMonthOptions: months, posFrom: st.posFrom, posTo: st.posTo, posLocked: !canEdit,
       posFetchLabel: st.posLoading ? '讀取中…' : (data ? '重新整理' : '取得資料'),
