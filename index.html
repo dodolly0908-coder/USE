@@ -86,7 +86,6 @@
     </sc-if>
     <div style="display:flex;align-items:center;gap:9px;margin-left:auto;background:{{ permPillBg }};border:1px solid {{ permPillBorder }};border-radius:999px;padding:5px 13px;">
       <span style="font-size:11px;font-weight:800;color:{{ permTagColor }};letter-spacing:.5px;">{{ permTag }}</span>
-      <span style="font-size:12.5px;font-weight:600;color:var(--ink2);">{{ permText }}</span>
     </div>
     <button onClick="{{ exportBackup }}" style="height:34px;border:1px solid var(--line2);background:var(--surf2);border-radius:8px;padding:0 14px;font-family:inherit;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;">⬇ 匯出備份</button>
     <button onClick="{{ logout }}" style="height:34px;border:1px solid var(--line2);background:var(--surf2);border-radius:8px;padding:0 14px;font-family:inherit;font-size:13px;font-weight:800;color:var(--ink2);cursor:pointer;">登出</button>
@@ -193,6 +192,7 @@
     <button onClick="{{ selectPageClean }}" style="height:36px;border:1.5px solid {{ pageCleanBorder }};background:{{ pageCleanBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageCleanColor }};cursor:pointer;">🧹 每週清潔值日</button>
     <button onClick="{{ selectPageWork }}" style="height:36px;border:1.5px solid {{ pageWorkBorder }};background:{{ pageWorkBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageWorkColor }};cursor:pointer;">🧾 每日工作表</button>
     <button onClick="{{ selectPageWork2 }}" style="height:36px;border:1.5px solid {{ pageWork2Border }};background:{{ pageWork2Bg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageWork2Color }};cursor:pointer;">🧾 每日工作表</button>
+    <button onClick="{{ selectPagePos }}" style="height:36px;border:1.5px solid {{ pagePosBorder }};background:{{ pagePosBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pagePosColor }};cursor:pointer;">🧩 崗位配置</button>
     <sc-if value="{{ canSeeCount }}" hint-placeholder-val="{{ false }}">
       <button onClick="{{ selectPageCount }}" style="height:36px;border:1.5px solid {{ pageCountBorder }};background:{{ pageCountBg }};border-radius:9px;padding:0 18px;font-family:inherit;font-size:13.5px;font-weight:800;color:{{ pageCountColor }};cursor:pointer;">📊 筆數</button>
     </sc-if>
@@ -1253,6 +1253,117 @@
     </div>
   </sc-if>
 
+  <sc-if value="{{ showPos }}" hint-placeholder-val="{{ false }}">
+    <div style="max-width:1480px;background:var(--card);border:1px solid var(--line2);border-radius:14px;box-shadow:0 2px 12px rgba(20,30,50,.06);padding:16px 18px;margin-bottom:14px;">
+      <div style="font-size:15px;font-weight:900;color:var(--ink);margin-bottom:12px;">崗位配置 <span style="font-size:11px;font-weight:700;color:var(--muted);">早班 08:00–16:00 各平台日均筆數（資料來源：筆數）</span></div>
+
+      <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;background:var(--surf1);border:1px solid var(--line2);border-radius:10px;padding:11px 12px;margin-bottom:12px;">
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">月份</span>
+          <select value="{{ posMonth }}" onChange="{{ onPosMonth }}" disabled="{{ posLocked }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);">
+            <sc-for list="{{ posMonthOptions }}" as="mo" hint-placeholder-count="3"><option value="{{ mo.value }}">{{ mo.label }}</option></sc-for>
+          </select>
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">起始日</span>
+          <input type="date" value="{{ posFrom }}" onChange="{{ onPosFrom }}" disabled="{{ posLocked }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">結束日</span>
+          <input type="date" value="{{ posTo }}" onChange="{{ onPosTo }}" disabled="{{ posLocked }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);" />
+        </label>
+        <label style="display:flex;flex-direction:column;gap:5px;"><span style="font-size:11px;font-weight:800;color:var(--muted);">上班人數（崗位數）</span>
+          <select value="{{ posHeadcount }}" onChange="{{ onPosHeadcount }}" disabled="{{ posLocked }}" style="height:34px;border:1px solid var(--rule);border-radius:8px;padding:0 10px;font-family:inherit;font-size:13px;font-weight:700;color:var(--ink);background:var(--card);">
+            <sc-for list="{{ posHeadcountOptions }}" as="ho" hint-placeholder-count="30"><option value="{{ ho.value }}">{{ ho.label }}</option></sc-for>
+          </select>
+        </label>
+        <button onClick="{{ fetchPos }}" style="height:34px;border:none;background:var(--accent);color:#fff;border-radius:8px;padding:0 18px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;">{{ posFetchLabel }}</button>
+        <span style="font-size:11.5px;font-weight:700;color:var(--muted);">{{ posUpdatedText }}</span>
+        <sc-if value="{{ posLocked }}" hint-placeholder-val="{{ false }}">
+          <span style="font-size:11.5px;font-weight:800;color:var(--muted);">🔒 僅組長以上可調整條件</span>
+        </sc-if>
+      </div>
+
+      <sc-if value="{{ posHasError }}" hint-placeholder-val="{{ false }}">
+        <div style="background:var(--rest-head);border:1px solid var(--rest);border-radius:10px;padding:10px 13px;font-size:12.5px;font-weight:800;color:var(--rest);margin-bottom:12px;white-space:pre-line;">{{ posError }}</div>
+      </sc-if>
+
+      <sc-if value="{{ posHasRows }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+          <span style="font-size:12px;font-weight:800;color:var(--muted);">早班日均合計</span>
+          <span style="font-size:22px;font-weight:900;color:var(--accent-deep);font-variant-numeric:tabular-nums;">{{ posAvgTotal }}</span>
+          <span style="font-size:12px;font-weight:700;color:var(--muted);">筆／日　·　統計 {{ posDays }} 天（{{ posRangeText }}）</span>
+        </div>
+        <div style="overflow:auto;max-height:620px;border:1px solid var(--line2);border-radius:10px;">
+          <table style="border-collapse:separate;border-spacing:0;font-size:13px;width:100%;min-width:460px;">
+            <thead>
+              <tr>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:left;">平台（商戶）</th>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:140px;">早班總筆數</th>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:140px;">早班日均</th>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:110px;">佔比</th>
+                <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:130px;">分類</th>
+              </tr>
+            </thead>
+            <tbody>
+              <sc-for list="{{ posRows }}" as="pr" hint-placeholder-count="8">
+                <tr>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ pr.code }}</td>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2);">{{ pr.total }}</td>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;color:var(--accent-deep);">{{ pr.avg }}</td>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;color:var(--ink2);">{{ pr.share }}</td>
+                  <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-size:12px;color:{{ pr.catColor }};">{{ pr.cat }}</td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ posHasRows }}" hint-placeholder-val="{{ false }}">
+        <div style="margin-top:18px;">
+          <div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+            <span style="font-size:14px;font-weight:900;color:var(--ink);">崗位分配</span>
+            <span style="font-size:11.5px;font-weight:700;color:var(--muted);">日均 ≥ 200 為大平台並拆分（200→2、300→3）；每崗位最多 4 個平台；IP 不重複，拿到大平台 IP 的崗位不再拿其他 IP</span>
+          </div>
+          <div style="display:flex;gap:18px;flex-wrap:wrap;margin-bottom:8px;font-size:12px;font-weight:800;color:var(--muted);">
+            <span>每崗位目標 <span style="font-size:16px;font-weight:900;color:var(--accent-deep);font-variant-numeric:tabular-nums;">{{ posTarget }}</span> 筆</span>
+            <span>最高與最低差 <span style="font-size:16px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;">{{ posSpread }}</span> 筆</span>
+            <span>平台份數 <span style="font-size:16px;font-weight:900;color:var(--ink);font-variant-numeric:tabular-nums;">{{ posPieceCount }}</span></span>
+          </div>
+          <sc-if value="{{ posHasWarn }}" hint-placeholder-val="{{ false }}">
+            <div style="background:var(--rest-head);border:1px solid var(--rest);border-radius:10px;padding:9px 13px;font-size:12px;font-weight:800;color:var(--rest);margin-bottom:8px;white-space:pre-line;">{{ posWarn }}</div>
+          </sc-if>
+          <div style="overflow:auto;border:1px solid var(--line2);border-radius:10px;">
+            <table style="border-collapse:separate;border-spacing:0;font-size:13px;width:100%;min-width:620px;">
+              <thead>
+                <tr>
+                  <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:left;width:90px;">崗位</th>
+                  <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:left;">平台</th>
+                  <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:80px;">平台數</th>
+                  <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:right;width:110px;">早班日均筆數</th>
+                  <th style="position:sticky;top:0;background:var(--surf2);border-bottom:1px solid var(--line2);padding:8px 12px;font-size:11.5px;font-weight:800;color:var(--muted);text-align:left;width:200px;">IP</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ posSlots }}" as="ps" hint-placeholder-count="13">
+                  <tr>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ ps.no }}</td>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);">{{ ps.plats }}</td>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;color:var(--ink2);">{{ ps.platCount }}</td>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);text-align:right;font-variant-numeric:tabular-nums;color:{{ ps.loadColor }};">{{ ps.load }}</td>
+                    <td style="border-bottom:1px solid var(--line);padding:7px 12px;font-weight:700;color:var(--ink);color:var(--accent-deep);">{{ ps.ip }}</td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ posShowEmpty }}" hint-placeholder-val="{{ true }}">
+        <div style="padding:34px 0;text-align:center;font-size:13px;font-weight:700;color:var(--muted);">{{ posEmptyText }}</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
   <sc-if value="{{ reasonEditOpen }}" hint-placeholder-val="{{ false }}">
     <div onClick="{{ closeReason }}" style="position:fixed;inset:0;z-index:49;background:transparent;"></div>
     <div style="{{ reasonEditStyle }}">
@@ -1425,6 +1536,7 @@ class Component extends DCLogic {
     this.state = {
       year:(new Date()).getFullYear(), month:(new Date()).getMonth()+1, current:'a',
       cntMonth: (()=>{ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); })(), cntFrom:'', cntTo:'', cntShift:'all', cntBucket:'all', cntPlatforms:[], cntData:null, cntLoading:false, cntError:'', cntUpdated:null,
+      posMonth: (()=>{ const n=new Date(); return n.getFullYear()+'-'+String(n.getMonth()+1).padStart(2,'0'); })(), posFrom:'', posTo:'', posData:null, posLoading:false, posError:'', posUpdated:null, posHeadcount: (()=>{ try{ const v=Number(localStorage.getItem('pos.headcount')); return v>0?v:13; }catch(e){ return 13; } })(),
       role:'admin', boundGroup:'a', boundMember:'',
       showAdmin:false, newMemberName:'',
       groupOrder: _roster.groupOrder,
@@ -2514,6 +2626,125 @@ class Component extends DCLogic {
         : msg });
     }
   };
+  fetchPos = async () => {
+    if(this.state.posLoading) return;
+    const mk = this.state.posMonth;
+    this.setState({ posLoading: true, posError: '' });
+    try {
+      const res = await fetch('/api/count?month=' + encodeURIComponent(mk), { method: 'GET', cache: 'no-store' });
+      if(res.status === 302 || res.status === 403) throw new Error('777444 拒絕連線（IP 不在白名單）。');
+      if(res.status === 401) throw new Error('金鑰錯誤（401）：請檢查 Vercel 環境變數 DETECT_API_KEY。');
+      if(!res.ok){ let t=''; try{ const j=await res.json(); t=j.error||''; }catch(e){} throw new Error('伺服器錯誤（'+res.status+'）'+(t?'：'+t:'')); }
+      const data = await res.json();
+      if(!data || data.ok===false) throw new Error('回傳 ok=false'+(data&&data.error?'：'+data.error:''));
+      this.setState({ posData: data, posLoading: false, posUpdated: new Date(), posError: '' });
+    } catch(e){
+      const msg = (e && e.message) || String(e);
+      this.setState({ posLoading: false, posError: /Failed to fetch|NetworkError|Load failed/i.test(msg) ? '無法連線到中轉站 /api/count，請確認網頁是從 Vercel 網址開啟。' : msg });
+    }
+  };
+  buildPosVM(canEdit){
+    const st = this.state;
+    const now = new Date();
+    const months = [0,1,2].map(i => { const d = new Date(now.getFullYear(), now.getMonth()-i, 1); return { value: this.cntMonthKey(d.getFullYear(), d.getMonth()+1), label: d.getFullYear()+' 年 '+(d.getMonth()+1)+' 月' }; });
+    const data = st.posData;
+    const hours = (data && data.hours) || {};
+    const sum = {}; const dates = new Set();
+    Object.keys(hours).forEach(key => {
+      const date = key.slice(0,10); const hh = Number(key.slice(11,13));
+      if(st.posFrom && date < st.posFrom) return;
+      if(st.posTo && date > st.posTo) return;
+      dates.add(date);
+      if(hh<8 || hh>=16) return;
+      Object.entries(hours[key]||{}).forEach(([code, arr]) => {
+        sum[code] = (sum[code]||0) + (arr||[]).reduce((a,b)=>a+(Number(b)||0),0);
+      });
+    });
+    const days = dates.size;
+    const grand = Object.values(sum).reduce((a,b)=>a+b,0);
+    const fmt1 = (n) => n.toLocaleString(undefined, { minimumFractionDigits:1, maximumFractionDigits:1 });
+    const rows = Object.keys(sum).filter(c => sum[c]>0).sort((a,b) => sum[b]-sum[a]).map(code => ({
+      code, total: sum[code].toLocaleString(), avg: days ? fmt1(sum[code]/days) : '—',
+      cat: (days && sum[code]/days>=200) ? ('大平台・拆 '+Math.max(2, Math.floor(sum[code]/days/100))) : '—',
+      catColor: (days && sum[code]/days>=200) ? 'var(--accent-deep)' : 'var(--muted)',
+      share: grand ? (sum[code]/grand*100).toFixed(1)+'%' : '—'
+    }));
+    // ===== 崗位分配 =====
+    const N = Math.max(1, Number(st.posHeadcount)||13);
+    const avgOf = {}; Object.keys(sum).forEach(c => { avgOf[c] = days ? sum[c]/days : 0; });
+    const splitN = (a) => a>=200 ? Math.max(2, Math.floor(a/100)) : 1;
+    const suffix = (k, i) => k===2 ? ['小','大'][i] : k===3 ? ['小','中','大'][i] : String(i+1);
+    const pieces = [];
+    Object.keys(avgOf).filter(c => avgOf[c]>0).forEach(c => {
+      const k = splitN(avgOf[c]);
+      if(k===1) pieces.push({ plat:c, name:c, load:avgOf[c], big:false });
+      else for(let i=0;i<k;i++) pieces.push({ plat:c, name:c+suffix(k,i), load:avgOf[c]/k, big:true });
+    });
+    pieces.sort((a,b) => b.load-a.load);
+    const slots = Array.from({length:N}, () => ({ items:[], load:0, plats:new Set(), ips:[], bigIp:false }));
+    let overflow = false;
+    pieces.forEach(p => {
+      let cand = slots.filter(x => x.items.length<4 && !x.plats.has(p.plat));
+      if(!cand.length){ overflow = true; cand = slots.filter(x => !x.plats.has(p.plat)); }
+      if(!cand.length) cand = slots;
+      const t = cand.reduce((b,x) => (x.load<b.load || (x.load===b.load && x.items.length<b.items.length)) ? x : b, cand[0]);
+      t.items.push(p); t.load += p.load; t.plats.add(p.plat);
+    });
+    // IP：每個平台一個 IP，不重複；拿到大平台 IP 的崗位不再拿其他 IP
+    const bigPlats = Object.keys(avgOf).filter(c => splitN(avgOf[c])>1).sort((a,b) => avgOf[b]-avgOf[a]);
+    const smallPlats = Object.keys(avgOf).filter(c => avgOf[c]>0 && splitN(avgOf[c])===1).sort((a,b) => avgOf[b]-avgOf[a]);
+    const smallCnt = (x) => x.items.filter(i => !i.big).length;
+    bigPlats.forEach(c => {
+      const hold = slots.filter(x => x.plats.has(c));
+      const pool = hold.filter(x => !x.ips.length).length ? hold.filter(x => !x.ips.length) : hold;
+      const t = pool.reduce((b,x) => (smallCnt(x)<smallCnt(b) || (smallCnt(x)===smallCnt(b) && x.load<b.load)) ? x : b, pool[0]);
+      if(t){ t.ips.push({ code:c, moved:false }); t.bigIp = true; }
+    });
+    smallPlats.forEach(c => {
+      const own = slots.find(x => x.plats.has(c));
+      if(own && !own.bigIp){ own.ips.push({ code:c, moved:false }); return; }
+      const free = slots.filter(x => !x.bigIp);
+      if(!free.length) return;
+      const t = free.reduce((b,x) => (x.ips.length<b.ips.length || (x.ips.length===b.ips.length && x.load<b.load)) ? x : b, free[0]);
+      t.ips.push({ code:c, moved:true });
+    });
+    const totalAvg = days ? grand/days : 0;
+    const loads = slots.map(x => x.load);
+    const fmt0 = (n) => Math.round(n).toLocaleString();
+    const posSlots = slots.map((x,i) => ({
+      no: '崗位 '+(i+1),
+      plats: x.items.length ? x.items.map(p => p.name).join('、') : '—',
+      platCount: x.items.length+' 個',
+      load: fmt0(x.load),
+      ip: x.ips.length ? x.ips.map(p => p.code + (p.moved?'（轉配）':'')).join('、') : '—',
+      loadColor: (totalAvg && Math.abs(x.load - totalAvg/N) > totalAvg/N*0.25) ? 'var(--rest)' : 'var(--accent-deep)',
+    }));
+    const posWarn = [];
+    if(overflow) posWarn.push('平台數量超過「每崗位最多 4 個」的容量（'+pieces.length+' 份 > '+N+'×4），部分崗位超過 4 個平台，建議增加人數。');
+    if(pieces.length && pieces.length < N) posWarn.push('平台（含拆分）只有 '+pieces.length+' 份，少於 '+N+' 個崗位，部分崗位為空。');
+    const pad = (n) => String(n).padStart(2,'0');
+    const u = st.posUpdated;
+    const sorted = [...dates].sort();
+    return {
+      posHeadcount: String(N), posHeadcountOptions: Array.from({length:30}, (_,i) => ({ value:String(i+1), label:(i+1)+' 人' })),
+      onPosHeadcount: (e) => { if(!canEdit) return; const v = Number(e.target.value)||13; try{ localStorage.setItem('pos.headcount', String(v)); }catch(err){} this.setState({ posHeadcount: v }); },
+      posSlots, posTarget: N ? fmt1(totalAvg/N) : '—', posSpread: loads.length ? fmt0(Math.max(...loads)-Math.min(...loads)) : '—',
+      posHasWarn: posWarn.length>0, posWarn: posWarn.join('\n'), posPieceCount: pieces.length,
+      posMonth: st.posMonth, posMonthOptions: months, posFrom: st.posFrom, posTo: st.posTo, posLocked: !canEdit,
+      posFetchLabel: st.posLoading ? '讀取中…' : (data ? '重新整理' : '取得資料'),
+      posUpdatedText: u ? ('更新於 '+pad(u.getHours())+':'+pad(u.getMinutes())+':'+pad(u.getSeconds())) : '',
+      posHasError: !!st.posError, posError: st.posError,
+      posHasRows: rows.length>0, posRows: rows, posDays: days,
+      posAvgTotal: days ? fmt1(grand/days) : '—',
+      posRangeText: sorted.length ? (sorted[0]+' ～ '+sorted[sorted.length-1]) : '',
+      posShowEmpty: !st.posError && rows.length===0,
+      posEmptyText: st.posLoading ? '讀取中…' : (data ? '此區間沒有早班筆數資料' : '按「取得資料」讀取早班筆數'),
+      onPosMonth: (e) => { if(!canEdit) return; const mk = e.target.value; const r = this.cntDefaultRange(mk); this.setState({ posMonth: mk, posFrom: r.from, posTo: r.to, posData: null, posError: '' }, () => this.fetchPos()); },
+      onPosFrom: (e) => { if(canEdit) this.setState({ posFrom: e.target.value }); },
+      onPosTo: (e) => { if(canEdit) this.setState({ posTo: e.target.value }); },
+      fetchPos: this.fetchPos,
+    };
+  }
   buildCountVM(){
     const st = this.state;
     const now = new Date();
@@ -2763,7 +2994,12 @@ class Component extends DCLogic {
     const hoEmpty = hoRows.length===0;
     const canSeeCount = role==='admin' || role==='lead';
     const showCount = page==='count' && canSeeCount;
-    const showRoster = page!=='handover' && page!=='duty' && page!=='clean' && page!=='work' && page!=='work2' && !showCount;
+    const showPos = page==='pos';
+    const canEditPos = role==='admin' || role==='lead';
+    const showRoster = page!=='handover' && page!=='duty' && page!=='clean' && page!=='work' && page!=='work2' && !showCount && !showPos;
+    const pagePosBg = showPos ? 'var(--accent-soft)' : 'var(--card)';
+    const pagePosBorder = showPos ? 'var(--accent)' : 'var(--line2)';
+    const pagePosColor = showPos ? 'var(--accent-deep)' : 'var(--ink2)';
     const pageCountBg = showCount ? 'var(--accent-soft)' : 'var(--card)';
     const pageCountBorder = showCount ? 'var(--accent)' : 'var(--line2)';
     const pageCountColor = showCount ? 'var(--accent-deep)' : 'var(--ink2)';
@@ -3167,6 +3403,9 @@ class Component extends DCLogic {
       pageDutyBg, pageDutyBorder, pageDutyColor, pageCleanBg, pageCleanBorder, pageCleanColor, pageWorkBg, pageWorkBorder, pageWorkColor,
       pageWork2Bg, pageWork2Border, pageWork2Color,
       canSeeCount, showCount, pageCountBg, pageCountBorder, pageCountColor,
+      showPos, pagePosBg, pagePosBorder, pagePosColor,
+      selectPagePos: () => { const first = !this.state.posData; const r = this.cntDefaultRange(this.state.posMonth); this.setState(s => ({ page:'pos', posFrom: s.posFrom || r.from, posTo: s.posTo || r.to }), () => { if(first) this.fetchPos(); }); },
+      ...this.buildPosVM(canEditPos),
       selectPageCount: () => { const first = !this.state.cntData; const r = this.cntDefaultRange(this.state.cntMonth); this.setState(s => ({ page:'count', cntFrom: s.cntFrom || r.from, cntTo: s.cntTo || r.to }), () => { if(first) this.fetchCount(); }); },
       ...this.buildCountVM(),
       hoForm, hoRows, hoEmpty,
